@@ -1,0 +1,13 @@
+﻿# Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# CSharp:
+*.pdb
+bin
+obj
+
+# My configurations:
+packages
+bower_components
