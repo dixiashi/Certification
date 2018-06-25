@@ -9,5 +9,6 @@ bin
 obj
 
 # My configurations:
+.vs
 packages
 bower_components
