@@ -1,0 +1,299 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://smtpjs.com/v2/smtp.js"></script>
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#send_SharePoint").on("click", SendEmailBySharePoint);
+            $("#send_SmtpJS").on("click", SendEmailBySmtpJS);
+            $("input[type='radio']").on("change", SetAttachment);
+
+            $("#send_SharePoint").hide();
+            $("#send_SmtpJS").hide();
+
+            $("#send").on("click", SendEmail);
+
+            $("#viaSmtpJS").click();
+        });
+
+        function SetAttachment(e) {
+            if ($("#viaSharePoint").prop("checked")) {
+                $("#mailFrom").val("v-qiha@microsoft.com");
+                $("#mailCc").val("v-qiha@microsoft.com");
+                $("#attachments").attr("disabled", "disabled");
+            } else {
+                $("#mailFrom").val("qiannianyu123@hotmail.com");
+                $("#mailCc").val("qiannianyu123@hotmail.com");
+                $("#attachments").attr("disabled", false);
+            }
+        }
+
+        function SendEmail(e) {
+            if ($("#viaSharePoint").prop("checked")) {
+                SendEmailBySharePoint(e);
+            } else {
+                SendEmailBySmtpJS(e);
+            }
+        }
+
+        function SendEmailBySmtpJS(e) {
+            //var sendEmailObj = new emailModel();
+            console.log("Send email by Smtpjs start!");
+            if ($('#attachments').prop('files').length != 0) {
+                var file = $('#attachments').prop('files')[0];
+                var reader = new FileReader();
+                reader.readAsBinaryString(file);
+                reader.onload = function () {
+                    var fileJsonObject = {
+                        "filetype": file.type,
+                        "filename": file.name
+                    };
+                    //var dataUri = "data: " + JSON.stringify(fileJsonObject) + "; base64, " + btoa(reader.result);
+                    var dataUri = "data: " + file.type + "; base64, " + btoa(reader.result);
+                    console.log(dataUri);
+                    Email.sendWithAttachment($("#mailFrom").val(),
+                        $("#mailTo").val(),
+                        $("#mailSubject").val(),
+                        $("#mailTemplate").html(),
+                        {
+                            token: "088063c1-a5fc-4217-8702-73753546457c",
+                            callback: function done(message) {
+                                alert("sent");
+                                console.log("Send email by Smtpjs end!");
+                            },
+                        },
+                        "",
+                        "",
+                        dataUri,
+                        ""
+                    );
+
+                };
+                reader.onerror = function () {
+                    console.log('there are some problems');
+                };
+            } else {
+                Email.send($("#mailFrom").val(),
+                    $("#mailTo").val(),
+                    "How to send email via SmtpJS",
+                    $("#mailTemplate").html(),
+                    {
+                        token: "088063c1-a5fc-4217-8702-73753546457c",
+                        callback: function done(message) {
+                            alert("sent");
+                            console.log("Send email by Smtpjs end!");
+                        },
+                    });
+
+            }
+
+        }
+
+        function SendEmailBySharePoint(e) {
+            var sendEmailObj = new emailModel();
+            console.log(JSON.stringify(sendEmailObj));
+
+            var UserList = "Jimmy, Emily, Yulong, Betty";
+            var emailbody = $("#mailBody").text();
+            emailbody = $("#mailTemplate").html();
+
+            sendEmail(sendEmailObj, emailbody);
+        }
+
+
+
+        var emailModel = function () {
+            // Email Either email groupname or email address
+            var from = $("#mailFrom").val(),
+                to = $("#mailTo").val(),
+                cc = $("#mailCc").val(),
+                subject = $("#mailSubject").val();
+
+            this.options = this.options || {};
+            this.options['fromEmail'] = this.options['fromEmail'] || {};
+            this.options['toEmail'] = this.options['toEmail'] || {};
+            this.options['ccEmail'] = this.options['ccEmail'] || {};
+            this.options['subject'] = this.options['subject'] || {};
+            this.options['fromEmail'] = from;
+            this.options['toEmail'] = to;
+            this.options['ccEmail'] = cc;
+            this.options['subject'] = subject;
+        }
+        function sendEmail(emailObj, body) {
+            var that = emailObj;
+            //Get the relative url of the site
+            var ServiceUrl = ((_spPageContextInfo.webServerRelativeUrl === '/') ? '/' : _spPageContextInfo.webServerRelativeUrl);
+
+            var siteurl = ServiceUrl;
+
+            var urlTemplate = siteurl + "/_api/SP.Utilities.Utility.SendEmail";
+
+            $.ajax({
+                contentType: 'application/json',
+                url: urlTemplate,
+                type: "POST",
+                data: JSON.stringify({
+                    'properties': {
+                        '__metadata': {
+                            'type': 'SP.Utilities.EmailProperties'
+                        },
+                        'From': that.options.fromEmail,
+                        'To': {
+                            'results': [that.options.toEmail]
+                        },
+                        'CC': {
+                            'results': [that.options.ccEmail]
+                        },
+                        'Body': body,
+                        'Subject': that.options.subject,
+                        "AdditionalHeaders":
+                        {
+                            "__metadata":
+                            { "type": "Collection(SP.KeyValue)" },
+                            "results":
+                            [
+                                {
+                                    "__metadata": {
+                                        "type": 'SP.KeyValue'
+                                    },
+                                    "Key": "content-type",
+                                    "Value": 'text/html',
+                                    "ValueType": "Edm.String"
+                                }
+                            ]
+                        }
+                    }
+                }),
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                    "content-type": "application/json;odata=verbose",
+                    "X-RequestDigest": jQuery("#__REQUESTDIGEST").val()
+                },
+                success: function (data) {
+                    alert('Sending Email succeed!', 1);
+                },
+                error: function (err) {
+                    // alert('Error in sending Email: ' + JSON.stringify(err));
+                    alert('Error in sending Email', 1);
+                }
+            });
+        }
+
+
+        var files = [];
+        $("input[type=file]").change(function (event) {
+            $.each(event.target.files, function (index, file) {
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    object = {};
+                    object.filename = file.name;
+                    object.data = event.target.result;
+                    files.push(object);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        $("form").submit(function (form) {
+            $.each(files, function (index, file) {
+                $.ajax({
+                    url: "/ajax-upload",
+                    type: 'POST',
+                    data: { filename: file.filename, data: file.data },
+                    success: function (data, status, xhr) { }
+                });
+            });
+            files = [];
+            form.preventDefault();
+        });
+    </script>
+    <style>
+        input, textarea {
+            width: 100%;
+            margin-top: 5px;
+            float: left;
+        }
+
+            input[type='radio'] {
+                width: 25px;
+            }
+    </style>
+</head>
+<body>
+
+    <div id="mailInfo">
+        <fieldset>
+
+            <fieldset>
+                <label for="viaSmtpJS">Via SmtpJS</label>
+                <input name="email_way" type="radio" id="viaSmtpJS" value="SmtpJS" />
+                <br />
+                <label for="viaSharePoint">Via SharePoint</label>
+                <input name="email_way" type="radio" id="viaSharePoint" value="SharePoint" />
+            </fieldset>
+
+            <legend>Send Email</legend>
+            <label>From: </label><br />
+            <input id="mailFrom" value="v-qiha@microsoft.com" />
+            <label>To: </label><br />
+            <!--<input id="mailTo" value="v-emil@microsoft.com;v-yulli@microsoft.com;v-qiha@microsoft.com;v-yabo@microsoft.com;v-shengg@microsoft.com;" />-->
+            <input id="mailTo" value="wscset@microsoft.com" />
+
+            <br />
+            <label>Cc: </label><br />
+            <input id="mailCc" value="v-qiha@microsoft.com" />
+            <br />
+            <label>Subject: </label><br />
+            <input id="mailSubject" value=" How to send email Via Javascirpt?" />
+
+            <br />
+            <label>Attachments: </label><br />
+            <input id="attachments" type="file" value="Please Add the attachment files." />
+
+            <br />
+            <label>Body: </label><br />
+            <textarea id="mailBody" rows="15">
+Hi All,
+
+Please ignore this email, it's a test about how to send email via javascript in Share Point Online. 
+
+Thanks,
+Qiang. 
+
+</textarea>
+            <button id="send" type="button">Send Email</button>
+
+            <button id="send_SharePoint" type="button">Send Email(SharePoint)</button>
+            <br />
+            <br />
+            <button id="send_SmtpJS" type="button">Send Email(SmtpJS)</button>
+        </fieldset>
+
+    </div>
+
+
+
+
+    <div id="mailTemplate" style="visibility:hidden;">
+        <div class="newsletter">
+            <div class="newsletter-main">
+                <h1>Hi Jimmy, Emily, Yulong, Betty,</h1>
+                <h2>Please ignore this email, it's a test about how to send email via javascript in Share Point Online!</h2>
+
+                <strong>Thanks,</strong>
+                <strong>Qiang,</strong>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
+

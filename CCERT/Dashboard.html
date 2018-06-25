@@ -1,0 +1,68 @@
+﻿<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+    <h1 class="h2">Grid Component Demo</h1>
+</div>
+
+<div id="components-grid-demo-child-page">
+    <ccert-grid v-bind:columns="columns"
+                v-bind:items="items"></ccert-grid>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+    });
+
+    new Vue({
+        el: '#components-grid-demo-child-page',
+        data: {
+            columns: buildGridColumns(),
+            items: buildTableData(),
+        },
+        created: function () {
+            // Alias the component instance as `vm`, so that we
+            // can access it inside the promise function
+            var vm = this
+            //// Build the menus data via SharePoint API
+            //fetch('{{SharePoint API}}')
+            //    .then(function (response) {
+            //        return response.json()
+            //    })
+            //    .then(function (data) {
+            //        vm.posts = data
+            //    })
+        },
+    });
+
+    function buildGridColumns() {
+        //["Our ID", "Code Name", "Product/Service Name", "Version", "Release Date", "Cert Type", "Status", "Operation"],
+        var result = [];
+        result.push({ name: "OurID", text: "Our ID", tag: "", class: "", style: "" });
+        result.push({ name: "CodeName", text: "Code Name", tag: "", class: "", style: "" });
+        result.push({ name: "ProductServiceName", text: "Product/Service Name", tag: "", class: "", style: "" });
+        result.push({ name: "Version", text: "Version", tag: "", class: "", style: "" });
+        result.push({ name: "ReleaseDate", text: "Release Date", tag: "", class: "", style: "" });
+        result.push({ name: "CertType", text: "CertType", tag: "", class: "", style: "" });
+        result.push({ name: "Status", text: "Status", tag: "", class: "", style: "" });
+        result.push({ name: "Operation", text: "Operation", tag: "", class: "", style: "" });
+        return result;
+    }
+
+    function buildTableData() {
+        var result = [];
+        for (var i = 0; i < 20; i++) {
+            var item = {
+                OurID: { type: "string", text: "ASG (Office)20162" + i, },
+                CodeName: { type: "string", text: "CollabDB" + i, },
+                ProductServiceName: { type: "string", text: "CollabDB" + i, },
+                Version: { type: "string", text: "1.0" + i, },
+                ReleaseDate: { type: "string", text: new Date(), },
+                CertType: { type: "string", text: "GB18030" + i, },
+                Status: { type: "string", text: "Planned" + i, },
+                Operation: { type: "string", text: "Edit" + i, },
+            };
+            result.push(item);
+        }
+
+        return result;
+    }
+</script>

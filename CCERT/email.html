@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="Panels/ccert.email.js"></script>
+    <script src="Panels/ccert.common.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var app = new Vue({
+                el: '#emailTemplate',
+                data: {
+                    body: "Please ignore this email, it's a test about how to send email via javascript in Share Point Online!",
+                }
+            })
+            console.log("start");
+
+            console.log($("#emailTemplate").html());
+            $($("#emailTemplate").html()).appendTo($("#emailTemplate1"));
+
+            console.log("end");
+
+            $("#send").on("click", function (e) {
+                console.log($.ccert.email.options);
+
+                from = $("#mailFrom").val(),
+                    to = $("#mailTo").val(),
+                    cc = $("#mailCc").val(),
+                    subject = $("#mailSubject").val();
+
+                var options = {
+                    "mailFrom": $("#mailFrom").val(),
+                    "mailTo": $("#mailTo").val(),
+                    "mailCc": $("#mailCc").val(),
+                    "mailSubject": $("#mailSubject").val(),
+                    "mailBody": $("#emailTemplate").html() + $("#mailBody").text(),
+                    success: null,
+                    error: null,
+                };
+
+                $.ccert.email.sendEmail(options);
+            });
+        });
+
+
+    </script>
+    <style>
+        input, textarea {
+            width: 100%;
+            margin-top: 5px;
+            float: left;
+        }
+
+            input[type='radio'] {
+                width: 25px;
+            }
+    </style>
+</head>
+<body>
+    <div id="mailInfo">
+        <fieldset>
+            <legend>Send Email</legend>
+            <label>From: </label><br />
+            <input id="mailFrom" value="v-qiha@microsoft.com" />
+            <label>To: </label><br />
+            <!--<input id="mailTo" value="v-emil@microsoft.com;v-yulli@microsoft.com;v-qiha@microsoft.com;v-yabo@microsoft.com;v-shengg@microsoft.com;" />-->
+            <input id="mailTo" value="wscset@microsoft.com" />
+
+            <br />
+            <label>Cc: </label><br />
+            <input id="mailCc" value="v-qiha@microsoft.com" />
+            <br />
+            <label>Subject: </label><br />
+            <input id="mailSubject" value=" How to send email Via Javascirpt?" />
+
+            <br />
+            <label>Body: </label><br />
+            <textarea id="mailBody" rows="15">
+Hi All,
+
+Please ignore this email, it's a test about how to send email via javascript in Share Point Online. 
+
+Thanks,
+Qiang. 
+
+</textarea>
+            <br />
+            <span> &nbsp; </span>
+            <br />
+
+            <button id="send" type="button">Send Email</button>
+
+        </fieldset>
+
+    </div>
+
+    <div id="emailTemplate1">
+        <!--<div class="newsletter">
+            <div class="newsletter-main">
+                <h1>Hi Jimmy, Emily, Yulong, Betty,</h1>
+                <h2>{{body}}</h2>
+                <strong>Thanks,</strong>
+                <strong>Qiang,</strong>
+            </div>
+        </div>-->
+    </div>
+
+    <script id="emailTemplate" type="text/template">
+        <div class="newsletter">
+            <div class="newsletter-main">
+                <h1>Hi Jimmy, Emily, Yulong, Betty,</h1>
+                <h2>{{body}}</h2>
+                <strong>Thanks,</strong> <br />
+                <strong>Qiang,</strong> <br />
+                <br />
+                <br />
+            </div>
+        </div>
+    </script>
+
+</body>
+</html>
+
+
+

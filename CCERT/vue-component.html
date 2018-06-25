@@ -1,0 +1,264 @@
+﻿
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>Dashboard Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <!-- Custom styles for this template -->
+    <link href="Contents/dashboard.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">China Standards Certification</a>
+        <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
+        <ul class="navbar-nav px-3">
+            <li class="nav-item text-nowrap">
+                <a class="nav-link" href="#">Sign out</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+                <div class="sidebar-sticky" id="components-demo">
+                    <ccert-menu v-for="menu in menus"
+                                v-bind:menu="menu"
+                                v-bind:root="root"
+                                :key="menu.name"></ccert-menu>
+                </div>
+            </nav>
+
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                    <h1 class="h2">Grid Component Demo</h1>
+                </div>
+
+                <div id="components-grid-demo">
+                    <ccert-grid v-bind:columns="columns"
+                                v-bind:items="items"></ccert-grid>
+                </div>
+
+                <h1>Hello World!</h1>
+                <input id="txtStartDate" name="txtStartDate" type="text" value="text" width="100" height="20" />
+
+
+                <div id="blog-posts-events-demo">
+                    <div :style="{ fontSize: postFontSize + 'em' }">
+                        <blog-post v-for="post in posts"
+                                   v-bind:key="post.id"
+                                   v-bind:post="post"
+                                   v-on:enlarge-text="onEnlargeText"></blog-post>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                    <h1 class="h2">Dashboard</h1>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+
+    <script src="Scripts/jquery-3.0.0.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+
+    <!-- Icons -->
+    <script src="Scripts/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="Components/ccert.component.menu.js"></script>
+    <script src="Components/ccert.component.grid.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            new Vue({
+                el: '#components-demo',
+                data: {
+                    menus: [
+                        { name: "Home", icon: "home" },
+                        { name: "Calendar", icon: "calendar", items: [] },
+                        {
+                            name: "Certification",
+                            icon: "home",
+                            items: [
+                                { name: "Learn", icon: "file-text" },
+                                {
+                                    name: "Apply",
+                                    icon: "",
+                                    items: [
+                                        { name: 'ASG (Office)', icon: "file-text" },
+                                        { name: 'ASG (Skype)', icon: "file-text" },
+                                        { name: 'C+E (Azure)', icon: "file-text" },
+                                        { name: 'C+E (DevDiv)', icon: "file-text" },
+                                        { name: 'C+E (DPG)', icon: "file-text" },
+                                        { name: 'C+E (Dynamics)', icon: "file-text" },
+                                        { name: 'C+E (Server)', icon: "file-text" },
+                                        { name: 'WDG', icon: "file-text" },
+                                    ]
+                                },
+                                {
+                                    name: "My Status",
+                                    icon: "home",
+                                    items: [
+                                        { name: 'ASG (Office)', icon: "file-text" },
+                                        { name: 'ASG (Skype)', icon: "file-text" },
+                                        { name: 'C+E (Azure)', icon: "file-text" },
+                                        { name: 'C+E (DevDiv)', icon: "file-text" },
+                                        { name: 'C+E (DPG)', icon: "file-text" },
+                                        { name: 'C+E (Dynamics)', icon: "file-text" },
+                                        { name: 'C+E (Server)', icon: "file-text" },
+                                        { name: 'WDG', icon: "file-text" },
+                                    ]
+                                },
+                                { name: "Renewal", icon: "file-text" },
+                                { name: "Active Certification", icon: "file-text" },
+                                { name: "Archive Certification", icon: "file-text" },
+                                { name: "All Subscription", icon: "file-text" },
+                            ]
+                        },
+                        {
+                            name: "Setting & Configuration",
+                            icon: "settings",
+                            items: [
+                                { name: "BG Profile", icon: "file-text", items: [] },
+                                { name: "Permission", icon: "file-text", items: [] },
+                                { name: "Mail Template", icon: "file-text", items: [] },
+                                { name: "CCERT Admin Data", icon: "file-text", items: [] },
+                            ]
+                        },
+                    ],
+                    colums: ["Our ID", "Code Name", "Product/Service Name", "Version	Release Date", "Cert Type", "Status","Operation"],
+                    root: {
+                        el: '#components-demo',
+                        inactive: (e) => {
+                            alert('inactive element');
+                            $("#components-demo a.active").removeClass('active');
+                        },
+                    },
+                },
+                created: function () {
+                    // Alias the component instance as `vm`, so that we
+                    // can access it inside the promise function
+                    var vm = this
+                    //// Build the menus data via SharePoint API
+                    //fetch('{{SharePoint API}}')
+                    //    .then(function (response) {
+                    //        return response.json()
+                    //    })
+                    //    .then(function (data) {
+                    //        vm.posts = data
+                    //    })
+                },
+            });
+
+            new Vue({
+                el: '#components-grid-demo',
+                data: {
+                    columns: buildGridColumns(),
+                    items: buildTableData(),
+                },
+                created: function () {
+                    // Alias the component instance as `vm`, so that we
+                    // can access it inside the promise function
+                    var vm = this
+                    //// Build the menus data via SharePoint API
+                    //fetch('{{SharePoint API}}')
+                    //    .then(function (response) {
+                    //        return response.json()
+                    //    })
+                    //    .then(function (data) {
+                    //        vm.posts = data
+                    //    })
+                },
+            });
+            feather.replace();
+
+
+
+            Vue.component('blog-post', {
+                props: ['post'],
+                template: `
+                <div class="blog-post">
+                    <h3>{{ post.title }}</h3>
+                    <button v-on:click="$emit('enlarge-text', {value:0.1, event:$event, call_back:ButtonClick})">
+                    Enlarge text
+                    </button>
+                    <div v-html="post.content"></div>
+                </div>
+                `,
+                methods: {
+                    ButtonClick: function (e) {
+                        console.log('ButtonClick')
+                        console.log(e)
+                    }
+                }
+            })
+
+            new Vue({
+                el: '#blog-posts-events-demo',
+                data: {
+                    posts: [
+                        { id: 1, title: 'My journey with Vue' },
+                        { id: 2, title: 'Blogging with Vue' },
+                        { id: 3, title: 'Why Vue is so fun' }
+                    ],
+                    postFontSize: 1,
+                },
+                methods: {
+                    onEnlargeText: function (enlargeAmount) {
+                        console.log(enlargeAmount)
+                        console.log(enlargeAmount.event.target)
+                        enlargeAmount.call_back(enlargeAmount.event);
+                    }
+                }
+            })
+        });
+
+        function buildGridColumns() {
+            //["Our ID", "Code Name", "Product/Service Name", "Version", "Release Date", "Cert Type", "Status", "Operation"],
+            var result = [];
+            result.push({ name: "OurID", text: "Our ID", tag: "", class: "", style: "" });
+            result.push({ name: "CodeName", text: "Code Name", tag: "", class: "", style: "" });
+            result.push({ name: "ProductServiceName", text: "Product/Service Name", tag: "", class: "", style: "" });
+            result.push({ name: "Version", text: "Version", tag: "", class: "", style: "" });
+            result.push({ name: "ReleaseDate", text: "Release Date", tag: "", class: "", style: "" });
+            result.push({ name: "CertType", text: "CertType", tag: "", class: "", style: "" });
+            result.push({ name: "Status", text: "Status", tag: "", class: "", style: "" });
+            result.push({ name: "Operation", text: "Operation", tag: "", class: "", style: "" });
+            return result;
+        }
+
+        function buildTableData() {
+            var result = [];
+            for (var i = 0; i < 20; i++) {
+                var item = {
+                    OurID: { type: "string", text: "ASG (Office)20162" + i, },
+                    CodeName: { type: "string", text: "CollabDB" + i, },
+                    ProductServiceName: { type: "string", text: "CollabDB" + i, },
+                    Version: { type: "string", text: "1.0" + i, },
+                    ReleaseDate: { type: "string", text: new Date(), },
+                    CertType: { type: "string", text: "GB18030" + i, },
+                    Status: { type: "string", text: "Planned" + i, },
+                    Operation: { type: "string", text: "Edit" + i, },
+                };
+                result.push(item);
+            }
+
+            return result;
+        }
+
+    </script>
+</body>
+</html>

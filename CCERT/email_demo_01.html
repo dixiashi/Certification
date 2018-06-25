@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script type="text/javascript">
+        'use restrict';
+        ; (function (ccert, $) {
+            ccert.common = {
+                isEmail: function (value) {
+                    // contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
+                    return /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i.test(value);
+                },
+                checkEmail: function (value) {
+                    console.log('checkEmail:' + value)
+                    if (!value || !this.isEmail(value)) {
+                        alert('Please enter the valid email address');
+                        return false;
+                    }
+
+                    return true;
+                },
+            };
+        })($.ccert = $.extend({}, this.ccert, $.ccert) || {}, jQuery);
+
+        'use restrict';
+        ; (function (ccert, $) {
+            ccert.email = {
+                options: {
+                    // Email Either email groupname or email address
+                    "mailFrom": null,
+                    "mailTo": null,
+                    "mailCc": null,
+                    "mailSubject": null,
+                    "mailBody": null,
+                    success: null,
+                    error: null,
+                },
+                sendEmail: function (options) {
+                    options = $.extend({}, this.options, options);
+
+                    //Check data
+                    if (!$.ccert.common.checkEmail(options.mailFrom)) {
+                        return;
+                    }
+
+                    //Check the SharePoint object
+                    if (!_spPageContextInfo) {
+                        alert('Please make sure that you have add this script into share point online site!');
+                        return;
+                    }
+
+                    //Get the relative url of the site
+                    var serviceUrl = ((_spPageContextInfo.webServerRelativeUrl === '/') ? '/' : _spPageContextInfo.webServerRelativeUrl);
+                    var sendEmailAPI = serviceUrl + "/_api/SP.Utilities.Utility.SendEmail";
+
+                    $.ajax({
+                        contentType: 'application/json',
+                        url: sendEmailAPI,
+                        type: "POST",
+                        data: JSON.stringify({
+                            'properties': {
+                                '__metadata': {
+                                    'type': 'SP.Utilities.EmailProperties'
+                                },
+                                'From': options.mailFrom,
+                                'To': {
+                                    'results': [options.mailTo]
+                                },
+                                'CC': {
+                                    'results': [options.mailCc]
+                                },
+                                'Body': options.mailBody,
+                                'Subject': options.mailSubject,
+                                "AdditionalHeaders":
+                                {
+                                    "__metadata":
+                                    { "type": "Collection(SP.KeyValue)" },
+                                    "results":
+                                    [
+                                        {
+                                            "__metadata": {
+                                                "type": 'SP.KeyValue'
+                                            },
+                                            "Key": "content-type",
+                                            "Value": 'text/html',
+                                            "ValueType": "Edm.String"
+                                        }
+                                    ]
+                                }
+                            }
+                        }),
+                        headers: {
+                            "Accept": "application/json;odata=verbose",
+                            "content-type": "application/json;odata=verbose",
+                            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+                        },
+                        success: function (data) {
+                            if (options.success) {
+                                options.success(data);
+                            }
+                            console.log(options);
+                            console.log('Sending Email succeed!');
+                        },
+                        error: function (err) {
+                            if (options.error) {
+                                options.error(err);
+                            }
+                            console.log(options);
+                            console.log('Error in sending Email: ' + JSON.stringify(err));
+                            alert('Error in sending Email', 1);
+                        }
+                    });
+                }
+            };
+        })($.ccert = $.extend({}, this.ccert, $.ccert) || {}, jQuery);
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var app = new Vue({
+                el: '#emailTemplate',
+                data: {
+                    body: "Please ignore this email, it's a test about how to send email via javascript in Share Point Online!",
+                    content: {
+                        ProductGroup: "ASG (Office)",
+                        ProductName: "ASG (Office)20162",
+                        VersionNumber: "1.0",
+                        CertificateType: "GB18030",
+                        RequestType: "RequestType",
+                        Applicant: "Qiang Hao",
+                        Status: "Planned",
+                        Description: "The data is a demo data.",
+                        Author: "Qiang Hao",
+                        Created: (new Date()).toDateString(),
+                        Modified: (new Date()).toDateString(),
+                    },
+                }
+            })
+            console.log("start");
+
+            console.log($("#emailTemplate").html());
+            $($("#emailTemplate").html()).appendTo($("#emailTemplate1"));
+
+            console.log("end");
+
+            $("#send").on("click", function (e) {
+                console.log($.ccert.email.options);
+
+                from = $("#mailFrom").val(),
+                    to = $("#mailTo").val(),
+                    cc = $("#mailCc").val(),
+                    subject = $("#mailSubject").val();
+
+                var options = {
+                    "mailFrom": $("#mailFrom").val(),
+                    "mailTo": $("#mailTo").val(),
+                    "mailCc": $("#mailCc").val(),
+                    "mailSubject": $("#mailSubject").val(),
+                    "mailBody": $("#emailTemplate").html(),
+                    success: function (e) { alert('Send Email succeed!'); },
+                    error: function (e) { alert('Send Email faile.' + JSON.stringify(e)); },
+                };
+
+                $.ccert.email.sendEmail(options);
+            });
+        });
+    </script>
+    <style>
+        input, textarea {
+            width: 98%;
+            margin-top: 5px;
+            float: left;
+        }
+
+            input[type='radio'] {
+                width: 25px;
+            }
+    </style>
+</head>
+<body>
+
+
+    <a name="clickMail" href="mailto:v-qiha@microsoft.com;">
+        Send Mail
+    </a>
+    <div id="mailInfo">
+        <fieldset>
+            <legend>Send Email</legend>
+            <label>From: </label><br />
+            <input id="mailFrom" value="v-qiha@microsoft.com" />
+            <br />
+            <br />
+            <label>To: </label>
+            <br />
+            <!--<input id="mailTo" value="v-emil@microsoft.com;v-yulli@microsoft.com;v-qiha@microsoft.com;v-yabo@microsoft.com;v-shengg@microsoft.com;" />-->
+            <input id="mailTo" value="wscset@microsoft.com" /><br />
+            <br />
+            <label>Cc: </label><br />
+            <input id="mailCc" value="v-qiha@microsoft.com" />
+            <br />
+            <br />
+            <label>Subject: </label><br />
+            <input id="mailSubject" value=" How to send email Via Javascirpt?" />
+            <br />
+            <br />
+            <label>Body: </label><br />
+            <div id="emailTemplate1" style="border:1px solid; padding:5px; width:98%">
+
+            </div>
+            <script id="emailTemplate" type="text/template">
+                <div class="newsletter">
+                    <div class="newsletter-main">
+<pre>
+Hello,                                                  <br />
+We have received your certification request:            <br />
+<strong>Product Group</strong>: {{content.ProductGroup}}         <br />
+<strong>Product Name</strong>: {{content.ProductName}}          <br />
+<strong>Version Number</strong>: {{content.VersionNumber}}       <br />
+<strong>Certificate Type</strong>: {{content.CertificateType}}   <br />
+<strong>Request Type</strong>: {{content.RequestType}}           <br />
+<strong>Applicant</strong>: {{content.Applicant}}                <br />
+<strong>Status</strong>: {{content.Status}}                       <br />
+<strong>Description</strong>: {{content.Description}}             <br />
+<strong>Created By</strong>: {{content.Author}}                   <br />
+<strong>Created Time</strong>: {{content.Created}}                <br />
+<strong>Last Modified Time</strong>: {{content.Modified}}         <br />
+
+For details,please visit: http://ccert2/SitePages/MyStatus.aspx
+We are working on your request and expect to provide you with an initial response within the next business day. 
+If you require further assistance please do not hesitate to contact us at the following email address: ccertadmin@microsoft.com
+China Certification Management Team
+</pre>
+                    </div>
+                </div>
+            </script>
+
+            <span> &nbsp; </span>
+            <br />
+
+            <button id="send" type="button">Send Email</button>
+
+        </fieldset>
+
+    </div>
+
+    <!--<h1>Hi Jimmy, Emily, Yulong, Betty,</h1>
+    <h2>{{body}}</h2>
+    <strong>Thanks,</strong> <br />
+    <strong>Qiang,</strong> <br />
+    <br />
+    <br />-->
+
+
+<div id="emailTemplate1">
+    <pre>
+        Hello,                                                  <br /><br />
+        <p>This is a notification that your Test0606 1.0 certification request has been returned for additional information:</p><br />
+        <strong>Product Group</strong>: {content.ProductGroup}         <br />         <br />
+        <strong>Product Name</strong>: {content.ProductName}          <br />         <br />
+        <strong>Version Number</strong>: {content.VersionNumber}       <br />         <br />
+        <strong>Certificate Type</strong>: {content.CertificateType}   <br />         <br />
+        <strong>Request Type</strong>: {content.RequestType}           <br />         <br />
+        <strong>Applicant</strong>: {content.Applicant}                <br />         <br />
+        <strong>Status</strong>: {content.Status}                       <br />         <br />
+        <strong>Description</strong>: {content.Description}             <br />         <br />
+        <strong>Comment</strong>: {content.Author}                    <br />         <br />
+        <strong>Created Time</strong>: {content.Created}                <br />         <br />
+        <strong>Last Modified Time</strong>: {content.Modified}         <br />         <br />
+
+        Applicant, please visit: http://ccert2/SitePages/MyStatus.aspx  <br />
+        Please work with the China Certification Management Team for the  resubmission.<br />
+        China Certificate Management Team<br />
+    </pre>
+</div>
+</body>
+</html>
+
+
+
